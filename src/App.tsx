@@ -89,7 +89,7 @@ export default function App() {
               as a <em>landscape</em>.
             </h1>
             <p className="tagline">
-              commit-scape turns a year of GitHub contributions into generative art — a procedural
+              commit-scape turns a year of GitHub contributions into generative art - a procedural
               mountain range, a Truchet pattern, or a piece of music. Nothing leaves your browser.
             </p>
             <SearchBar
@@ -140,7 +140,7 @@ export default function App() {
             </figure>
 
             <p className="caption">
-              <strong>@{year.username}</strong> — {year.totalContributions.toLocaleString('en-US')}{' '}
+              <strong>@{year.username}</strong> - {year.totalContributions.toLocaleString('en-US')}{' '}
               contributions in the last 12 months · data {SOURCE_LABEL[state.source ?? 'graphql']}
               {year.approximate && ' (levels 0–4, not exact counts)'}
             </p>
@@ -150,7 +150,7 @@ export default function App() {
       </main>
 
       <footer className="site-footer">
-        <span>commit-scape — generative art from your GitHub graph.</span>
+        <span>commit-scape - generative art from your GitHub graph.</span>
         <span>Your token is used only from this tab and never stored.</span>
       </footer>
     </div>
