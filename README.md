@@ -15,7 +15,7 @@
 
 </div>
 
-![Demo de commit-scape](docs/demo.gif)
+![Demo de commit-scape](.github/demo.gif)
 
 ---
 
@@ -65,9 +65,7 @@ query($username: String!) {
 
 ```
 commit-scape/
-├── index.html
-├── public/
-│   └── favicon.svg
+├── index.html            # Entrada (favicon incrustado como data URI)
 ├── src/
 │   ├── main.tsx            # Entrada, fuentes y estilos
 │   ├── App.tsx             # Composición: hero / estudio
@@ -89,7 +87,7 @@ commit-scape/
 │   └── components/         # SearchBar, ModeTabs, PaletteSelector,
 │                           # Landscape, Truchet, SoundPanel, ExportButtons
 ├── test/                   # Tests de toda función pura de cálculo
-└── .github/workflows/      # Deploy automático a GitHub Pages
+└── .github/                # Workflow de deploy + demo.gif de este README
 ```
 
 Cada archivo tiene una responsabilidad única (SRP). Toda la lógica de cálculo (curvas, ruido, mapeo de notas, encoder WAV) es pura y está cubierta por tests.
