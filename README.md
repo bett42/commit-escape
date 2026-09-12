@@ -77,11 +77,16 @@ query($username: String!) {
 ```
 commit-scape/
 ├── index.html              # Entry point (favicon inlined as data URI)
+├── package.json            # Scripts and dependencies (+ lockfile)
+├── tsconfig.json           # Strict TypeScript config
+├── vite.config.ts          # Vite build (React plugin, relative base)
+├── vitest.config.ts        # Unit test config
 ├── src/
 │   ├── main.tsx            # React bootstrap, fonts and styles
 │   ├── App.tsx             # Composition: hero / studio
 │   ├── styles.css          # Design system (tokens + components)
 │   ├── types.ts            # ContributionDay / ContributionYear / RenderMode
+│   ├── vite-env.d.ts       # Vite client types
 │   ├── lib/
 │   │   ├── prng.ts         # hash + mulberry32 + value noise (deterministic)
 │   │   ├── palettes.ts     # The four palettes
