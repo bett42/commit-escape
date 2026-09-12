@@ -88,6 +88,13 @@ main {
   font-weight: 560;
   font-size: 1.45rem;
   letter-spacing: -0.01em;
+  color: var(--text);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.wordmark:hover {
+  opacity: 0.7;
 }
 
 .header-note {
