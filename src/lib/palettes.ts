@@ -46,7 +46,7 @@ export const PALETTES: Palette[] = [
     sky: ['#04120a', '#0a2e1a', '#0e4429'],
     body: '#c4f5d0',
     halo: '#39d353',
-    ridges: ['#0e4429', '#0b5a2b', '#117a37', '#0a3d20'],
+    ridges: ['#0e4429', '#0f6a31', '#149140', '#062a16'],
     ink: '#e6f9ec',
     inkSoft: '#7ee2a0',
     stars: true,

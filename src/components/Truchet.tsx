@@ -25,6 +25,20 @@ export function Truchet({ scene, palette, svgRef }: Props) {
       className="artwork-svg"
     >
       <rect width="1600" height="900" fill={palette.ridges[3]} />
+      {/* faint pipe grid so quiet days still read as texture */}
+      {scene.tiles.map((tile, i) => (
+        <path
+          key={`base-${i}`}
+          d={d}
+          transform={`translate(${tile.x} ${tile.y}) rotate(${tile.rotation * 90} ${scene.cell / 2} ${scene.cell / 2})`}
+          fill="none"
+          stroke={palette.ridges[1]}
+          strokeWidth={scene.cell * 0.09}
+          strokeLinecap="round"
+          opacity="0.5"
+        />
+      ))}
+      {/* data layer: busier days glow brighter and thicker */}
       {scene.tiles.map((tile, i) => (
         <path
           key={i}
@@ -32,9 +46,9 @@ export function Truchet({ scene, palette, svgRef }: Props) {
           transform={`translate(${tile.x} ${tile.y}) rotate(${tile.rotation * 90} ${scene.cell / 2} ${scene.cell / 2})`}
           fill="none"
           stroke={palette.body}
-          strokeWidth={scene.cell * (0.1 + 0.22 * tile.level)}
+          strokeWidth={scene.cell * (0.08 + 0.2 * tile.level)}
           strokeLinecap="round"
-          opacity={0.1 + 0.9 * tile.level}
+          opacity={0.12 + 0.88 * tile.level}
         >
           <title>{`${tile.date}: ${tile.level.toFixed(2)}`}</title>
         </path>
