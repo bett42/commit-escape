@@ -62,7 +62,16 @@ export default function App() {
   return (
     <div className="app">
       <header className="site-header">
-        <a className="wordmark">commit-scape</a>
+        <a
+          className="wordmark"
+          href="/"
+          onClick={(e) => {
+            e.preventDefault();
+            window.location.assign('/');
+          }}
+        >
+          commit-scape
+        </a>
         <div className="header-right">
           <span className="header-note">100% client-side</span>
           <a
