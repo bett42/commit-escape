@@ -3,16 +3,25 @@ import type { ContributionDay, ContributionYear } from '../types';
 const GRAPHQL_URL = 'https://api.github.com/graphql';
 
 /**
- * Third-party CORS proxies used only in token-less mode. GitHub's contribution
- * fragment sends no CORS headers, so a direct browser fetch is impossible.
- * Nothing sensitive crosses these proxies: the URL they fetch is fully public.
- * They are tried in order — any one of them being down should not break the app.
+ * Token-less mode reads only fully public data, from several sources raced
+ * in parallel — any one of them answering is enough:
+ *
+ * 1. a community mirror of the contribution calendar (JSON, CORS-enabled)
+ * 2. third-party CORS proxies fronting the public github.com fragment
+ *
+ * Nothing sensitive crosses these services: no token is ever involved here.
  */
+const MIRROR_URL = (username: string) =>
+  `https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(username)}?y=last`;
+
 const CORS_PROXIES = [
   (url: string) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
   (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
   (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
 ];
+
+/** Per-source timeout so one hanging service can't stall the others. */
+const SOURCE_TIMEOUT_MS = 9000;
 
 const CALENDAR_QUERY = `query($username: String!) {
   user(login: $username) {
@@ -173,29 +182,100 @@ export function parseContributionsHtml(html: string): ScrapedCalendar | null {
   return { days, total, approximate };
 }
 
+interface MirrorJson {
+  total?: { lastYear?: unknown };
+  contributions?: { date?: unknown; count?: unknown }[];
+}
+
+/** Parse the mirror's JSON shape into calendar days, grouping by calendar week. */
+export function parseContributionsJson(json: unknown): ScrapedCalendar | null {
+  const data = json as MirrorJson;
+  if (!data || !Array.isArray(data.contributions)) return null;
+  const total = data.total?.lastYear;
+  if (typeof total !== 'number') return null;
+
+  const days: ScrapedDay[] = [];
+  for (const entry of data.contributions) {
+    if (typeof entry.date !== 'string' || typeof entry.count !== 'number') return null;
+    days.push({
+      date: entry.date,
+      count: entry.count,
+      weekday: new Date(`${entry.date}T00:00:00Z`).getUTCDay(),
+      week: 0,
+    });
+  }
+  if (days.length === 0) return null;
+
+  days.sort((a, b) => a.date.localeCompare(b.date));
+  let week = 0;
+  for (let i = 0; i < days.length; i++) {
+    if (i > 0 && days[i].weekday === 0) week++;
+    days[i].week = week;
+  }
+  return { days, total, approximate: false };
+}
+
+/** Resolve with the first non-null result, or null once every source failed. */
+function firstSuccess(tasks: (() => Promise<ScrapedCalendar | null>)[]): Promise<ScrapedCalendar | null> {
+  return new Promise((resolve) => {
+    let pending = tasks.length;
+    for (const task of tasks) {
+      task()
+        .then((result) => {
+          if (result) resolve(result);
+        })
+        .catch(() => {
+          // a failed source just leaves the race
+        })
+        .finally(() => {
+          if (--pending === 0) resolve(null);
+        });
+    }
+  });
+}
+
+async function fetchJsonSource(username: string, signal?: AbortSignal): Promise<ScrapedCalendar | null> {
+  const combined = AbortSignal.any([signal ?? new AbortController().signal, AbortSignal.timeout(SOURCE_TIMEOUT_MS)]);
+  const response = await fetch(MIRROR_URL(username), { signal: combined });
+  if (response.status === 404) {
+    throw new FetchError('not-found', `No GitHub user named "${username}".`);
+  }
+  if (!response.ok) return null;
+  return parseContributionsJson(await response.json());
+}
+
+async function fetchHtmlSource(username: string, proxied: (url: string) => string, signal?: AbortSignal): Promise<ScrapedCalendar | null> {
+  const combined = AbortSignal.any([signal ?? new AbortController().signal, AbortSignal.timeout(SOURCE_TIMEOUT_MS)]);
+  const target = `https://github.com/users/${encodeURIComponent(username)}/contributions`;
+  const response = await fetch(proxied(target), { signal: combined });
+  if (!response.ok) return null;
+  return parseContributionsHtml(await response.text());
+}
+
 /**
- * Token-less fallback: scrape the public contributions fragment through
- * whatever CORS proxy answers first. Fragile by nature — GitHub can change
- * the markup at any time.
+ * Token-less fallback: race the public mirror and the CORS proxies, first
+ * good answer wins. Fragile by nature — GitHub can change its markup and
+ * third-party services can rate-limit — so the token path stays recommended.
  */
 export async function fetchViaScrape(username: string, signal?: AbortSignal): Promise<ContributionYear> {
-  const target = `https://github.com/users/${encodeURIComponent(username)}/contributions`;
+  let sawNotFound = false;
+  const sources = [
+    () =>
+      fetchJsonSource(username, signal).catch((error: unknown) => {
+        if (error instanceof FetchError && error.code === 'not-found') sawNotFound = true;
+        return null;
+      }),
+    ...CORS_PROXIES.map(
+      (proxied) => () => fetchHtmlSource(username, proxied, signal).catch(() => null),
+    ),
+  ];
 
-  let parsed: ScrapedCalendar | null = null;
-  for (const proxied of CORS_PROXIES) {
-    try {
-      const response = await fetch(proxied(target), { signal });
-      if (!response.ok) continue;
-      parsed = parseContributionsHtml(await response.text());
-      if (parsed) break;
-    } catch {
-      // try the next proxy
-    }
-  }
+  const parsed = await firstSuccess(sources);
   if (!parsed) {
+    if (sawNotFound) throw new FetchError('not-found', `No GitHub user named "${username}".`);
     throw new FetchError(
       'network',
-      'The public-page fallback failed through every proxy. Add a token for reliable data.',
+      'Every public data source failed right now. Add a token for reliable data.',
     );
   }
 

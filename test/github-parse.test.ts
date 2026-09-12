@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseContributionsHtml } from '../src/lib/github';
+import { parseContributionsHtml, parseContributionsJson } from '../src/lib/github';
 
 /**
  * Fixture mirrors the real fragment served by github.com/users/{u}/contributions:
@@ -70,5 +70,42 @@ describe('parseContributionsHtml', () => {
 
   it('returns null when there are no calendar cells', () => {
     expect(parseContributionsHtml('<html><body>Not Found</body></html>')).toBeNull();
+  });
+});
+
+describe('parseContributionsJson', () => {
+  // shape served by the community mirror: flat day list + totals
+  const MIRROR = {
+    total: { lastYear: 15 },
+    contributions: [
+      { date: '2026-09-06', count: 3, level: 1 }, // Sunday
+      { date: '2026-09-07', count: 0, level: 0 },
+      { date: '2026-09-08', count: 12, level: 4 },
+      { date: '2026-09-13', count: 0, level: 0 }, // next Sunday
+      { date: '2026-09-14', count: 5, level: 2 },
+    ],
+  };
+
+  it('parses days and the yearly total', () => {
+    const parsed = parseContributionsJson(MIRROR)!;
+    expect(parsed.days.map((d) => d.count)).toEqual([3, 0, 12, 0, 5]);
+    expect(parsed.total).toBe(15);
+    expect(parsed.approximate).toBe(false);
+  });
+
+  it('starts a new week on every Sunday', () => {
+    const parsed = parseContributionsJson(MIRROR)!;
+    expect(parsed.days.map((d) => d.week)).toEqual([0, 0, 0, 1, 1]);
+    expect(parsed.days[0].weekday).toBe(0);
+    expect(parsed.days[4].weekday).toBe(1);
+  });
+
+  it('rejects malformed payloads', () => {
+    expect(parseContributionsJson(null)).toBeNull();
+    expect(parseContributionsJson({})).toBeNull();
+    expect(parseContributionsJson({ total: { lastYear: 1 }, contributions: [] })).toBeNull();
+    expect(
+      parseContributionsJson({ total: { lastYear: 1 }, contributions: [{ date: 5, count: 1 }] }),
+    ).toBeNull();
   });
 });

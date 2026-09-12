@@ -72,8 +72,8 @@ export function SearchBar({ loading, suggestToken, onSubmit }: Props) {
             </a>{' '}
             is enough to read public contributions. It is only ever sent to{' '}
             <code>api.github.com</code> from this tab — never stored, never proxied. Without a
-            token, commit-scape scrapes your public profile page through third-party CORS proxies,
-            which can be slow or rate-limited.
+            token, commit-scape reads your public calendar through third-party mirrors, which can
+            be slow or rate-limited.
           </p>
         </div>
       </details>

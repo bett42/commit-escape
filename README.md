@@ -39,7 +39,7 @@
 GitHub no expone un endpoint REST público para el calendario de contribuciones. Hay dos caminos:
 
 1. **GraphQL oficial (recomendado)** — `contributionsCollection.contributionCalendar` con un Personal Access Token que pegas en la app. Un token clásico **sin scopes** basta para datos públicos. Datos exactos por día.
-2. **Fallback sin token** — scraping del fragmento público `github.com/users/{usuario}/contributions` a través de un proxy CORS de terceros. Es **aproximado** (niveles 0–4 cuando el tooltip no está disponible) y **frágil**: si GitHub cambia el HTML, se rompe. La app lo indica claramente cuando muestra datos aproximados.
+2. **Fallback sin token** — varias fuentes públicas se consultan en paralelo y gana la primera que responda: un espejo comunitario del calendario (JSON con CORS habilitado) y tres proxies CORS al fragmento `github.com/users/{usuario}/contributions`. Funciona igual con 12 commits que con 4.000, pero sigue siendo **menos confiable** que el token: servicios de terceros pueden tener rate-limit y GitHub puede cambiar su HTML. La app indica claramente cuando los datos son aproximados (niveles 0–4 en vez de counts exactos).
 
 ```graphql
 query($username: String!) {
@@ -164,7 +164,7 @@ Cada push a `main` construye y publica en GitHub Pages (`.github/workflows/deplo
 GitHub exposes no public REST endpoint for the contribution calendar. Two paths:
 
 1. **Official GraphQL (recommended)** — `contributionsCollection.contributionCalendar` with a Personal Access Token you paste into the app. A classic token **with no scopes** is enough for public data. Exact per-day counts.
-2. **Token-less fallback** — scrapes the public `github.com/users/{username}/contributions` fragment through a third-party CORS proxy. It is **approximate** (levels 0–4 when the tooltip is missing) and **fragile**: if GitHub changes the markup, it breaks. The app clearly flags approximate data.
+2. **Token-less fallback** — several public sources are raced in parallel and the first good answer wins: a community mirror of the calendar (JSON with CORS enabled) plus three CORS proxies fronting the `github.com/users/{username}/contributions` fragment. It works the same with 12 commits as with 4,000, but it is still **less reliable** than a token: third-party services can rate-limit and GitHub can change its markup. The app clearly flags approximate data (levels 0–4 instead of exact counts).
 
 ---
 

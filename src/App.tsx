@@ -45,7 +45,7 @@ function Artwork({ mode, year, paletteId, showOverlay, svgRef }: ArtworkProps) {
 const SOURCE_LABEL = {
   cache: 'from your local cache',
   graphql: 'exact, via the GitHub GraphQL API',
-  scrape: 'scraped from the public profile page',
+  scrape: 'via public mirrors, no token',
 } as const;
 
 export default function App() {
