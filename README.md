@@ -17,7 +17,19 @@
 
 </div>
 
+<div align="center">
+
 ![Demo de commit-scape](.github/demo.gif)
+
+</div>
+
+---
+
+## Cómo usarla
+
+1. Escribe un username de GitHub y pulsa **Generate**. Sin token funciona igual; con token los datos son exactos.
+2. Elige el modo — **Landscape**, **Truchet** o **Sound** — y la paleta.
+3. Exporta: **PNG** a 2400×1350 para wallpaper, **SVG** vectorial, o **WAV** desde el modo Sound.
 
 ---
 
@@ -150,6 +162,14 @@ La versión web vive en Vercel. No hace falta ningún workflow ni configuración
 
 ---
 
+## Usage
+
+1. Type a GitHub username and hit **Generate**. It works without a token; with one, the data is exact.
+2. Pick a mode — **Landscape**, **Truchet** or **Sound** — and a palette.
+3. Export: **PNG** at 2400×1350 for wallpapers, vector **SVG**, or **WAV** from Sound mode.
+
+---
+
 ## Features
 
 - **Three render modes** for the same contribution calendar:
@@ -171,6 +191,54 @@ GitHub exposes no public REST endpoint for the contribution calendar. Two paths:
 
 1. **Official GraphQL (recommended)** — `contributionsCollection.contributionCalendar` with a Personal Access Token you paste into the app. A classic token **with no scopes** is enough for public data. Exact per-day counts.
 2. **Token-less fallback** — several public sources are raced in parallel and the first good answer wins: a community mirror of the calendar (JSON with CORS enabled) plus three CORS proxies fronting the `github.com/users/{username}/contributions` fragment. It works the same with 12 commits as with 4,000, but it is still **less reliable** than a token: third-party services can rate-limit and GitHub can change its markup. The app clearly flags approximate data (levels 0–4 instead of exact counts).
+
+---
+
+## Project structure
+
+```
+commit-scape/
+├── index.html              # Entry point (favicon inlined as data URI)
+├── src/
+│   ├── main.tsx            # React bootstrap, fonts and styles
+│   ├── App.tsx             # Composition: hero / studio
+│   ├── styles.css          # Design system (tokens + components)
+│   ├── types.ts            # ContributionDay / ContributionYear / RenderMode
+│   ├── lib/
+│   │   ├── prng.ts         # hash + mulberry32 + value noise (deterministic)
+│   │   ├── palettes.ts     # The four palettes
+│   │   ├── landscape.ts    # Procedural curve (Catmull-Rom) and scene
+│   │   ├── truchet.ts      # Tile layout
+│   │   ├── github.ts       # GraphQL + token-less public sources
+│   │   ├── cache.ts        # IndexedDB with TTL
+│   │   ├── sonify.ts       # Intensity → note mapping (pure)
+│   │   ├── player.ts       # Tone.js: playback and offline render
+│   │   ├── wav.ts          # 16-bit PCM WAV encoder (pure)
+│   │   └── export.ts       # SVG/PNG with embedded fonts
+│   ├── hooks/
+│   │   └── useContributions.ts
+│   └── components/         # SearchBar, ModeTabs, PaletteSelector, Landscape,
+│                           # Truchet, SoundPanel, ExportButtons
+├── test/                   # Tests for every pure calculation
+└── .github/                # demo.gif for this README
+```
+
+Every file has a single responsibility (SRP). All calculation logic (curves, noise, note mapping, WAV encoder) is pure and covered by tests.
+
+---
+
+## Technologies
+
+| Tool | Purpose |
+|------|---------|
+| React 19 + TypeScript | UI |
+| Vite | Build and dev server |
+| Generative SVG | Artwork rendering (exportable by design) |
+| Tone.js | Sonification and offline WAV render |
+| IndexedDB | Calendar cache (6 h) |
+| Vitest | Unit tests |
+| Vercel | Web version hosting |
+| Fraunces / Space Grotesk / JetBrains Mono | Typography (via Fontsource) |
 
 ---
 
