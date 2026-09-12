@@ -7,9 +7,11 @@
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
 ![Tone.js](https://img.shields.io/badge/Tone.js-15-000000?logo=webrtc&logoColor=white)
 ![Vitest](https://img.shields.io/badge/Vitest-4-6E9F18?logo=vitest&logoColor=white)
-![Tipo](https://img.shields.io/badge/Tipo-Proyecto%20Educativo-blue)
+![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white)
 
 **El jardín verde de GitHub es una serie temporal de intensidad. commit-scape lo convierte en arte generativo: una cordillera procedural, un patrón Truchet o una pieza musical — descargable como imagen o audio.**
+
+**[Abrir la app ↗](https://commit-scape.vercel.app)**
 
 [English version ↓](#english)
 
@@ -65,9 +67,9 @@ query($username: String!) {
 
 ```
 commit-scape/
-├── index.html            # Entrada (favicon incrustado como data URI)
+├── index.html              # Entrada (favicon incrustado como data URI)
 ├── src/
-│   ├── main.tsx            # Entrada, fuentes y estilos
+│   ├── main.tsx            # Bootstrap de React, fuentes y estilos
 │   ├── App.tsx             # Composición: hero / estudio
 │   ├── styles.css          # Sistema de diseño (tokens + componentes)
 │   ├── types.ts            # ContributionDay / ContributionYear / RenderMode
@@ -76,7 +78,7 @@ commit-scape/
 │   │   ├── palettes.ts     # Las cuatro paletas
 │   │   ├── landscape.ts    # Curva procedural (Catmull-Rom) y escena
 │   │   ├── truchet.ts      # Layout de baldosas
-│   │   ├── github.ts       # GraphQL + fallback de scraping
+│   │   ├── github.ts       # GraphQL + fuentes públicas sin token
 │   │   ├── cache.ts        # IndexedDB con TTL
 │   │   ├── sonify.ts       # Mapeo intensidad → nota (puro)
 │   │   ├── player.ts       # Tone.js: reproducción y render offline
@@ -84,10 +86,10 @@ commit-scape/
 │   │   └── export.ts       # SVG/PNG con fuentes incrustadas
 │   ├── hooks/
 │   │   └── useContributions.ts
-│   └── components/         # SearchBar, ModeTabs, PaletteSelector,
-│                           # Landscape, Truchet, SoundPanel, ExportButtons
+│   └── components/         # SearchBar, ModeTabs, PaletteSelector, Landscape,
+│                           # Truchet, SoundPanel, ExportButtons
 ├── test/                   # Tests de toda función pura de cálculo
-└── .github/                # Workflow de deploy + demo.gif de este README
+└── .github/                # demo.gif de este README
 ```
 
 Cada archivo tiene una responsabilidad única (SRP). Toda la lógica de cálculo (curvas, ruido, mapeo de notas, encoder WAV) es pura y está cubierta por tests.
@@ -104,6 +106,7 @@ Cada archivo tiene una responsabilidad única (SRP). Toda la lógica de cálculo
 | Tone.js | Sonificación y render offline a WAV |
 | IndexedDB | Caché del calendario (6 h) |
 | Vitest | Tests unitarios |
+| Vercel | Hosting de la versión web |
 | Fraunces / Space Grotesk / JetBrains Mono | Tipografía (vía Fontsource) |
 
 ---
@@ -119,7 +122,10 @@ npm run build    # typecheck + build de producción
 
 ## Despliegue
 
-Cada push a `main` construye y publica en GitHub Pages (`.github/workflows/deploy.yml`). Activa **Settings → Pages → Source: GitHub Actions** en el repo.
+La versión web vive en Vercel. No hace falta ningún workflow ni configuración extra:
+
+1. Importa el repo en [vercel.com/new](https://vercel.com/new) — detecta Vite automáticamente (`build`: `npm run build`, output: `dist`).
+2. Cada push a `main` redespliega solo.
 
 ---
 
@@ -134,9 +140,11 @@ Cada push a `main` construye y publica en GitHub Pages (`.github/workflows/deplo
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
 ![Tone.js](https://img.shields.io/badge/Tone.js-15-000000?logo=webrtc&logoColor=white)
 ![Vitest](https://img.shields.io/badge/Vitest-4-6E9F18?logo=vitest&logoColor=white)
-![Type](https://img.shields.io/badge/Type-Educational%20Project-blue)
+![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white)
 
 **GitHub's green garden is a time series of intensity. commit-scape turns it into generative art: a procedural mountain range, a Truchet pattern, or a piece of music — downloadable as image or audio.**
+
+**[Open the app ↗](https://commit-scape.vercel.app)**
 
 </div>
 
@@ -177,7 +185,10 @@ npm run build    # typecheck + production build
 
 ## Deploy
 
-Every push to `main` builds and publishes to GitHub Pages (`.github/workflows/deploy.yml`). Enable **Settings → Pages → Source: GitHub Actions** on the repo.
+The web version lives on Vercel. No workflow or extra config needed:
+
+1. Import the repo at [vercel.com/new](https://vercel.com/new) — it auto-detects Vite (`build`: `npm run build`, output: `dist`).
+2. Every push to `main` redeploys automatically.
 
 ---
 
