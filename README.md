@@ -10,8 +10,6 @@
 
 **GitHub's green garden is a time series of intensity. commit-scape turns it into generative art: a procedural mountain range, a Truchet pattern, or a piece of music - downloadable as image or audio.**
 
-**[Open the app ↗](https://commit-scape.vercel.app)**
-
 </div>
 
 <div align="center">
