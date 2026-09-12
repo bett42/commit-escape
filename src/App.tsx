@@ -45,7 +45,7 @@ function Artwork({ mode, year, paletteId, showOverlay, svgRef }: ArtworkProps) {
 const SOURCE_LABEL = {
   cache: 'from your local cache',
   graphql: 'exact, via the GitHub GraphQL API',
-  scrape: 'approximate, scraped from the public profile page',
+  scrape: 'scraped from the public profile page',
 } as const;
 
 export default function App() {
@@ -78,7 +78,11 @@ export default function App() {
               commit-scape turns a year of GitHub contributions into generative art — a procedural
               mountain range, a Truchet pattern, or a piece of music. Nothing leaves your browser.
             </p>
-            <SearchBar loading={status === 'loading'} onSubmit={load} />
+            <SearchBar
+              loading={status === 'loading'}
+              suggestToken={state.suggestToken}
+              onSubmit={load}
+            />
             {state.error && <p className="error-line">{state.error}</p>}
           </section>
         )}
@@ -86,7 +90,11 @@ export default function App() {
         {ready && (
           <section className="studio">
             <div className="studio-bar">
-              <SearchBar loading={status === 'loading'} onSubmit={load} />
+              <SearchBar
+                loading={status === 'loading'}
+                suggestToken={state.suggestToken}
+                onSubmit={load}
+              />
             </div>
 
             <div className="controls">

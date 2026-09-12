@@ -1,17 +1,30 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 
 interface Props {
   loading: boolean;
+  /** true after a failed token-less attempt — opens the token section */
+  suggestToken: boolean;
   onSubmit: (username: string, token: string) => void;
 }
 
-export function SearchBar({ loading, onSubmit }: Props) {
+export function SearchBar({ loading, suggestToken, onSubmit }: Props) {
   const [username, setUsername] = useState('');
   const [token, setToken] = useState('');
+  const [open, setOpen] = useState(false);
+  const [hint, setHint] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (suggestToken) setOpen(true);
+  }, [suggestToken]);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    if (username.trim()) onSubmit(username, token.trim());
+    if (!username.trim()) {
+      setHint('Type a GitHub username first.');
+      return;
+    }
+    setHint(null);
+    onSubmit(username, token.trim());
   };
 
   return (
@@ -28,12 +41,17 @@ export function SearchBar({ loading, onSubmit }: Props) {
           spellCheck={false}
           autoFocus
         />
-        <button className="btn-primary" type="submit" disabled={loading || !username.trim()}>
+        <button className="btn-primary" type="submit" disabled={loading}>
           {loading ? 'Painting…' : 'Generate'}
         </button>
       </div>
+      {hint && <p className="field-hint">{hint}</p>}
 
-      <details className="token-details">
+      <details
+        className="token-details"
+        open={open}
+        onToggle={(e) => setOpen(e.currentTarget.open)}
+      >
         <summary>
           Add a token for exact data <span className="summary-hint">optional</span>
         </summary>
@@ -54,8 +72,8 @@ export function SearchBar({ loading, onSubmit }: Props) {
             </a>{' '}
             is enough to read public contributions. It is only ever sent to{' '}
             <code>api.github.com</code> from this tab — never stored, never proxied. Without a
-            token, commit-scape scrapes your public profile page through a third-party CORS proxy,
-            which is approximate and can break.
+            token, commit-scape scrapes your public profile page through third-party CORS proxies,
+            which can be slow or rate-limited.
           </p>
         </div>
       </details>

@@ -11,9 +11,17 @@ export interface ContributionsState {
   error: string | null;
   /** where the data came from, for the small print under the artwork */
   source: 'cache' | 'graphql' | 'scrape' | null;
+  /** true when a token-less attempt failed — the UI nudges toward the token field */
+  suggestToken: boolean;
 }
 
-const INITIAL: ContributionsState = { status: 'idle', year: null, error: null, source: null };
+const INITIAL: ContributionsState = {
+  status: 'idle',
+  year: null,
+  error: null,
+  source: null,
+  suggestToken: false,
+};
 
 function friendlyMessage(error: unknown): string {
   if (error instanceof FetchError) return error.message;
@@ -36,7 +44,7 @@ export function useContributions() {
 
     const cached = await getCached(clean);
     if (cached) {
-      setState({ status: 'ready', year: cached, error: null, source: 'cache' });
+      setState({ ...INITIAL, status: 'ready', year: cached, source: 'cache' });
       return;
     }
 
@@ -47,19 +55,25 @@ export function useContributions() {
           ...INITIAL,
           status: 'error',
           error: `@${clean} has no public contributions in the last year.`,
+          suggestToken: !token,
         });
         return;
       }
       void setCached(clean, year);
       setState({
+        ...INITIAL,
         status: 'ready',
         year,
-        error: null,
         source: token ? 'graphql' : 'scrape',
       });
     } catch (error) {
       if (controller.signal.aborted) return;
-      setState({ ...INITIAL, status: 'error', error: friendlyMessage(error) });
+      setState({
+        ...INITIAL,
+        status: 'error',
+        error: friendlyMessage(error),
+        suggestToken: !token,
+      });
     }
   }, []);
 
