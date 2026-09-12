@@ -76,7 +76,7 @@ export default function App() {
           <span className="header-note">100% client-side</span>
           <a
             className="github-link"
-            href="https://github.com/bett42/commit-escape"
+            href="https://github.com/bett42/commit-scape"
             target="_blank"
             rel="noreferrer"
             aria-label="Source code on GitHub"
