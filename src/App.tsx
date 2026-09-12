@@ -62,7 +62,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="site-header">
-        <span className="wordmark">commit—scape</span>
+        <span className="wordmark">commit-scape</span>
         <span className="header-note">100% client-side</span>
       </header>
 
